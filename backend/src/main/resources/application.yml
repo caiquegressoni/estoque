@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: saas_estoque
+  datasource:
+    url: jdbc:postgresql://localhost:5432/estoque_rd_betta_JG
+    username: postgres
+    password: Alakazan@123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+api:
+  security:
+    token:
+      secret: secret-key-for-application-saas-estque-definition-inHard-Decryp-331177
+server:
+  port: 8080
