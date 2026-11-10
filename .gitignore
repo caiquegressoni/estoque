@@ -1,0 +1,39 @@
+#Maven
+target/
+
+#Java
+*.class
+
+#IntelliJ IDEA
+.idea/
+*.iml
+
+#VS Code
+.vscode/
+
+#Frontend
+node_modules/
+dist/
+
+#Variáveis de ambiente e senhas
+.env
+.env.*
+!.env.example
+# Configuracoes locais do agente; as instrucoes compartilhadas ficam em /AGENTS.md
+/.agents/
+TASKS.md
+
+# Credenciais e chaves locais
+.auth0-checkmate.env
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Configuração local da Auth0 CLI
+/.config/auth0/
+
+# Relatórios de auditoria com dados do tenant
+reports/
+/reports/auth0-checkmate/*_report.json
+/reports/auth0-checkmate/*.pdf
