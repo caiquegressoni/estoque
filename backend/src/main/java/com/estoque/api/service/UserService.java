@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -41,22 +43,27 @@ public class UserService {
                 .toList();
     }
 
+    public UserResponseDTO getCurrentUser() {
+        return new UserResponseDTO(getAuthenticatedUser());
+    }
+
     public UserResponseDTO createUser(CreateUserRequestDTO data) {
         UserModel loggedUser = getAuthenticatedUser();
         if (loggedUser.getRole() != UserRole.ADMIN) {
             throw new AccessDeniedException("Acesso negado: apenas administradores podem cadastrar novos colaboradores.");
         }
 
-        if (userRepository.findByEmail(data.email()).isPresent()) {
+        String normalizedEmail = data.email().trim().toLowerCase(Locale.ROOT);
+        if (userRepository.findByEmailIgnoreCase(normalizedEmail).isPresent()) {
             throw new RuntimeException("Já existe um usuário cadastrado com este e-mail.");
         }
 
-        String encryptedPassword = passwordEncoder.encode(data.password());
+        String encryptedPassword = passwordEncoder.encode(UUID.randomUUID().toString());
         UserRole role = data.role() != null ? data.role() : UserRole.USER;
 
         UserModel newUser = new UserModel(
                 data.fullName(),
-                data.email(),
+                normalizedEmail,
                 encryptedPassword,
                 role,
                 loggedUser.getTenant()

@@ -1,9 +1,12 @@
-import { logout } from './auth';
-
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+let accessTokenProvider = null;
+
+export function setAccessTokenProvider(provider) {
+  accessTokenProvider = provider;
+}
 
 export async function request(endpoint, options = {}) {
-  const token = localStorage.getItem('meuTokenJWT');
+  const token = accessTokenProvider ? await accessTokenProvider() : null;
 
   const headers = {
     'Content-Type': 'application/json',
@@ -15,14 +18,6 @@ export async function request(endpoint, options = {}) {
     ...options,
     headers,
   });
-
-  // Se o token expirou ou for inválido (401), desloga e redireciona para a tela de login
-  if (response.status === 401) {
-    if (token) {
-      logout();
-      window.location.href = '/';
-    }
-  }
 
   return response;
 }

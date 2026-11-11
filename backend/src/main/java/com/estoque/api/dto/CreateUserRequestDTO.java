@@ -5,7 +5,6 @@ import com.estoque.api.model.enums.UserRole;
 public record CreateUserRequestDTO(
     String fullName,
     String email,
-    String password,
     UserRole role
 ) {
 }

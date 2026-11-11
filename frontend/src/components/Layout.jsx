@@ -1,14 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { isAdmin, getUserData, logout } from '../services/auth';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuthSession } from '../auth/AuthSessionProvider';
 import { request } from '../services/api';
 
 export default function Layout({ children }) {
   const location = useLocation();
-  const navigate = useNavigate();
-
-  const userIsAdmin = isAdmin();
-  const userData = getUserData();
+  const { currentUser, logout } = useAuthSession();
+  const userIsAdmin = currentUser?.role === 'ADMIN';
 
   // Estados da Central de Alertas
   const [alertsData, setAlertsData] = useState(null);
@@ -68,7 +66,6 @@ export default function Layout({ children }) {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
   };
 
   // Título e Categoria do Módulo Atual para o Top Header
@@ -148,7 +145,7 @@ export default function Layout({ children }) {
     return name.slice(0, 2).toUpperCase();
   };
 
-  const userInitials = getInitials(userData?.username);
+  const userInitials = getInitials(currentUser?.fullName || currentUser?.username);
   const totalAlerts = alertsData?.totalAlerts || 0;
   const criticalCount = alertsData?.criticalCount || 0;
   const warningCount = alertsData?.warningCount || 0;
@@ -235,7 +232,7 @@ export default function Layout({ children }) {
                 overflow: 'hidden', 
                 textOverflow: 'ellipsis' 
               }}>
-                {userData?.username || 'Usuário'}
+                {currentUser?.fullName || currentUser?.username || 'Usuário'}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
                 <span style={{

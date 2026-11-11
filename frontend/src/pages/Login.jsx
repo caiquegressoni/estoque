@@ -1,51 +1,14 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthSession } from '../auth/AuthSessionProvider';
 
 function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated, loading, currentUser, login, logout, refreshProfile, profileError } = useAuthSession();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
-      const response = await fetch(`${apiUrl}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("meuTokenJWT", data.token);
-
-        try {
-          const payload = JSON.parse(atob(data.token.split('.')[1]));
-          localStorage.setItem("userRole", payload.role);
-        } catch (e) {
-          console.error("Erro ao ler dados do token:", e);
-        }
-
-        navigate('/dashboard');
-      } else {
-        alert("Usuário ou senha incorretos!");
-      }
-    } catch (error) {
-      console.error("Erro de requisição: ", error);
-      alert("Não foi possível conectar ao servidor. O Spring Boot está ativo?");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    if (isAuthenticated && currentUser) navigate('/dashboard', { replace: true });
+  }, [isAuthenticated, currentUser, navigate]);
 
   return (
     <div style={{ 
@@ -95,53 +58,12 @@ function Login() {
           </p>
         </div>
 
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '12.5px', color: 'var(--text-secondary)', fontWeight: '600' }}>
-              Usuário de Acesso
-            </label>
-            <input 
-              type="text" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="ex: caique.gressoni"
-              required
-              style={{ 
-                padding: '11px 14px', 
-                borderRadius: '8px', 
-                border: '1px solid var(--border-subtle)', 
-                backgroundColor: 'var(--bg-surface-subtle)', 
-                color: '#fff', 
-                fontSize: '13.5px' 
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '12.5px', color: 'var(--text-secondary)', fontWeight: '600' }}>
-              Senha
-            </label>
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              style={{ 
-                padding: '11px 14px', 
-                borderRadius: '8px', 
-                border: '1px solid var(--border-subtle)', 
-                backgroundColor: 'var(--bg-surface-subtle)', 
-                color: '#fff', 
-                fontSize: '13.5px' 
-              }}
-            />
-          </div>
-
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {profileError && <p role="alert" style={{ color: '#fca5a5', fontSize: '13px' }}>{profileError}</p>}
           <button 
-            type="submit" 
-            disabled={isLoading}
+            type="button" 
+            onClick={isAuthenticated ? refreshProfile : login}
+            disabled={loading}
             style={{ 
               marginTop: '8px', 
               padding: '12px', 
@@ -151,15 +73,19 @@ function Login() {
               borderRadius: '8px', 
               fontSize: '14px', 
               fontWeight: '600', 
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.7 : 1,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1,
               boxShadow: '0 4px 14px rgba(2, 132, 199, 0.35)'
             }}
           >
-            {isLoading ? 'Autenticando...' : 'Acessar Sistema'}
+            {loading ? 'Carregando...' : isAuthenticated ? 'Tentar novamente' : 'Entrar com Auth0'}
           </button>
-          
-        </form>
+          {isAuthenticated && (
+            <button type="button" onClick={logout} style={{ padding: 10, background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 8 }}>
+              Sair da conta Auth0
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

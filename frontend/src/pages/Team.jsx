@@ -1,20 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { request } from '../services/api';
-import { isAdmin, getUserData } from '../services/auth';
+import { useAuthSession } from '../auth/AuthSessionProvider';
 
 export default function Team() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [role, setRole] = useState('USER');
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const currentUser = getUserData();
-  const admin = isAdmin();
+  const { currentUser } = useAuthSession();
+  const admin = currentUser?.role === 'ADMIN';
 
   const fetchUsers = async () => {
     try {
@@ -64,7 +63,6 @@ export default function Team() {
         body: JSON.stringify({
           fullName,
           email,
-          password,
           role,
         }),
       });
@@ -73,7 +71,6 @@ export default function Team() {
         alert('Colaborador cadastrado com sucesso!');
         setFullName('');
         setEmail('');
-        setPassword('');
         setRole('USER');
         setModalOpen(false);
         fetchUsers();
@@ -324,7 +321,7 @@ export default function Team() {
             </div>
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '20px' }}>
-              O nome de usuário para login será gerado como <code>primeiro.ultimo</code> nome.
+              O colaborador deverá entrar com Auth0 usando este e-mail verificado.
             </p>
 
             <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -347,18 +344,6 @@ export default function Team() {
                   placeholder="ana@empresa.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  required
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12.5px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: '500' }}>Senha Provisória *</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
                   required
                   style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', boxSizing: 'border-box' }}
                 />

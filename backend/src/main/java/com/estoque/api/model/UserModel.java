@@ -4,7 +4,6 @@ import com.estoque.api.model.enums.UserRole;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.text.Normalizer;
 import java.util.Collection;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class UserModel implements UserDetails {
+public class UserModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +25,9 @@ public class UserModel implements UserDetails {
 
     @Column(unique = true, nullable = false, updatable = false)
     private String username;
+
+    @Column(name = "auth0_subject", unique = true)
+    private String auth0Subject;
 
     @Column(nullable = false)
     private String password;
@@ -63,7 +65,7 @@ public class UserModel implements UserDetails {
         return fullName;
     }
 
-    // O pulo do gato: Quando setar o nome, gera o username automaticamente
+    // Quando setar o nome, gera o username automaticamente
     public void setFullName(String fullName) {
         this.fullName = fullName;
         this.username = generateUsername(fullName);
@@ -84,6 +86,14 @@ public class UserModel implements UserDetails {
     // O username agora é gerado pelo setFullName, mas mantemos o setter padrão se necessário pelo Hibernate
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getAuth0Subject() {
+        return auth0Subject;
+    }
+
+    public void setAuth0Subject(String auth0Subject) {
+        this.auth0Subject = auth0Subject;
     }
 
     public String getPassword() {
@@ -138,29 +148,8 @@ public class UserModel implements UserDetails {
         return firstName + "." + lastName;
     }
 
-    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
     }
 
     @Override

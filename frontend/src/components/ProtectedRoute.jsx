@@ -1,16 +1,28 @@
 import { Navigate } from 'react-router-dom';
-import { getToken, isAdmin } from '../services/auth';
+import { useAuthSession } from '../auth/AuthSessionProvider';
 
 export default function ProtectedRoute({ children, roleRequired }) {
-  const token = getToken();
+  const { isAuthenticated, loading, currentUser, profileError, refreshProfile, logout } = useAuthSession();
 
-  // Se não existir o token salvo no navegador, redireciona para a página de Login
-  if (!token) {
+  if (loading) {
+    return <div style={{ padding: 32, color: '#fff' }}>Carregando sessão...</div>;
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 
-  // Se a rota exige papel de ADMIN e o usuário é apenas um operador
-  if (roleRequired === 'ADMIN' && !isAdmin()) {
+  if (profileError || !currentUser) {
+    return (
+      <div style={{ padding: 32, color: '#fff' }}>
+        <p>{profileError || 'Esta conta Auth0 não está vinculada a um usuário do Estoque.'}</p>
+        <button onClick={refreshProfile}>Tentar novamente</button>
+        <button onClick={logout} style={{ marginLeft: 8 }}>Sair</button>
+      </div>
+    );
+  }
+
+  if (roleRequired === 'ADMIN' && currentUser.role !== 'ADMIN') {
     return <Navigate to="/produtos" replace />;
   }
 

@@ -1,11 +1,24 @@
 spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTH0_ISSUER_URI}
+          audiences:
+            - ${AUTH0_AUDIENCE}
 
 server:
   port: ${PORT:8080}
 
 app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  auth0:
+    claims:
+      email: ${AUTH0_EMAIL_CLAIM:https://api.estoque.local/claims/email}
+      email-verified: ${AUTH0_EMAIL_VERIFIED_CLAIM:https://api.estoque.local/claims/email_verified}
   bootstrap:
     admin:
       enabled: ${BOOTSTRAP_ADMIN_ENABLED:false}
