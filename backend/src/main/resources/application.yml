@@ -16,6 +16,12 @@ app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   auth0:
+    management:
+      domain: ${AUTH0_DOMAIN:}
+      client-id: ${AUTH0_MGMT_CLIENT_ID:}
+      client-secret: ${AUTH0_MGMT_CLIENT_SECRET:}
+      public-client-id: ${AUTH0_PUBLIC_CLIENT_ID:}
+      database-connection: ${AUTH0_DATABASE_CONNECTION:Username-Password-Authentication}
     claims:
       email: ${AUTH0_EMAIL_CLAIM:https://api.estoque.local/claims/email}
       email-verified: ${AUTH0_EMAIL_VERIFIED_CLAIM:https://api.estoque.local/claims/email_verified}

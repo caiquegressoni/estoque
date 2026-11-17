@@ -8,7 +8,8 @@ public record UserResponseDTO(
     String fullName,
     String username,
     String email,
-    UserRole role
+    UserRole role,
+    boolean auth0Linked
 ) {
     public UserResponseDTO(UserModel user) {
         this(
@@ -16,7 +17,8 @@ public record UserResponseDTO(
             user.getFullName(),
             user.getUsername(),
             user.getEmail(),
-            user.getRole()
+            user.getRole(),
+            user.getAuth0Subject() != null
         );
     }
 }

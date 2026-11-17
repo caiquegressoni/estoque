@@ -8,9 +8,9 @@ export default function Team() {
   const [users, setUsers] = useState([]);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('USER');
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [retryingUserId, setRetryingUserId] = useState(null);
 
   const { currentUser } = useAuthSession();
   const admin = currentUser?.role === 'ADMIN';
@@ -63,20 +63,24 @@ export default function Team() {
         body: JSON.stringify({
           fullName,
           email,
-          role,
         }),
       });
 
       if (response.ok) {
-        alert('Colaborador cadastrado com sucesso!');
+        const result = await response.json();
+        alert(result.passwordSetupEmailSent
+          ? 'Colaborador cadastrado no Estoque e no Auth0. O Auth0 enviou um e-mail para ele definir a senha.'
+          : result.passwordSetupRequired
+            ? 'Colaborador cadastrado no Estoque e no Auth0, mas o Auth0 não conseguiu enviar o e-mail para definir a senha. Peça ao colaborador para usar “Esqueci minha senha” na tela de login.'
+            : 'Colaborador vinculado a uma conta Auth0 já verificada. Ele pode entrar usando a senha que já possui.');
         setFullName('');
         setEmail('');
-        setRole('USER');
         setModalOpen(false);
         fetchUsers();
       } else {
         const err = await response.json().catch(() => ({}));
-        alert(err.message || 'Erro ao cadastrar colaborador. Verifique se o e-mail já existe.');
+        alert(`${err.message || 'Erro ao cadastrar colaborador. Verifique se o e-mail já existe.'}\n\nSe o colaborador aparecer na lista sem vínculo Auth0, use “Concluir Auth0” para retomar o cadastro.`);
+        fetchUsers();
       }
     } catch (error) {
       console.error('Erro de rede:', error);
@@ -119,6 +123,31 @@ export default function Team() {
     } catch (error) {
       console.error('Erro ao excluir usuário:', error);
       alert('Erro de rede ao tentar remover o colaborador.');
+    }
+  };
+
+  const handleRetryAuth0Provisioning = async (user) => {
+    setRetryingUserId(user.id);
+    try {
+      const response = await request(`/users/${user.id}/provision-auth0`, { method: 'POST' });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        alert(error.message || 'Não foi possível concluir o cadastro no Auth0.');
+        return;
+      }
+
+      const result = await response.json();
+      alert(result.passwordSetupEmailSent
+        ? 'Vínculo Auth0 concluído. O Auth0 enviou um e-mail para o colaborador definir a senha.'
+        : result.passwordSetupRequired
+          ? 'Vínculo Auth0 concluído, mas o e-mail não foi enviado. Peça ao colaborador para usar “Esqueci minha senha” na tela de login.'
+          : 'Vínculo Auth0 concluído. O colaborador já possui uma conta verificada e pode entrar com ela.');
+      fetchUsers();
+    } catch (error) {
+      console.error('Erro ao concluir cadastro Auth0:', error);
+      alert('Erro de rede ao tentar concluir o cadastro no Auth0.');
+    } finally {
+      setRetryingUserId(null);
     }
   };
 
@@ -226,6 +255,11 @@ export default function Team() {
                         <span style={{ fontWeight: '600', color: '#fff', fontSize: '13.5px' }}>
                           {u.fullName}
                         </span>
+                        {!u.auth0Linked && (
+                          <span style={{ fontSize: '10.5px', color: '#fbbf24' }} title="Cadastro local aguardando vínculo Auth0">
+                            Pendente Auth0
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td style={{ padding: '14px 18px' }}>
@@ -265,9 +299,28 @@ export default function Team() {
                           (Sua Conta)
                         </span>
                       ) : (
-                        <button
-                          onClick={() => handleDeleteUser(u)}
-                          style={{
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          {!u.auth0Linked && (
+                            <button
+                              onClick={() => handleRetryAuth0Provisioning(u)}
+                              disabled={retryingUserId === u.id}
+                              style={{
+                                backgroundColor: 'rgba(56, 189, 248, 0.08)',
+                                color: 'var(--accent-cyan)',
+                                border: '1px solid rgba(56, 189, 248, 0.2)',
+                                borderRadius: '6px',
+                                padding: '6px 12px',
+                                fontSize: '12px',
+                                fontWeight: '500',
+                                cursor: retryingUserId === u.id ? 'wait' : 'pointer',
+                              }}
+                            >
+                              {retryingUserId === u.id ? 'Concluindo...' : 'Concluir Auth0'}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteUser(u)}
+                            style={{
                             backgroundColor: 'rgba(244, 63, 94, 0.08)',
                             color: '#f43f5e',
                             border: '1px solid rgba(244, 63, 94, 0.2)',
@@ -281,10 +334,11 @@ export default function Team() {
                             gap: '4px',
                             transition: 'all 0.15s ease'
                           }}
-                          title={`Remover ${u.fullName}`}
-                        >
-                          Excluir
-                        </button>
+                            title={`Remover ${u.fullName}`}
+                          >
+                            Excluir
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -321,7 +375,7 @@ export default function Team() {
             </div>
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '20px' }}>
-              O colaborador deverá entrar com Auth0 usando este e-mail verificado.
+              A conta será criada no Auth0. O colaborador receberá um e-mail para definir a senha e confirmar o endereço.
             </p>
 
             <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -347,18 +401,6 @@ export default function Team() {
                   required
                   style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', boxSizing: 'border-box' }}
                 />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12.5px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: '500' }}>Papel / Permissão</label>
-                <select
-                  value={role}
-                  onChange={e => setRole(e.target.value)}
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', boxSizing: 'border-box', cursor: 'pointer' }}
-                >
-                  <option value="USER">Operador de Almoxarifado</option>
-                  <option value="ADMIN">Administrador Geral</option>
-                </select>
               </div>
 
               <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>

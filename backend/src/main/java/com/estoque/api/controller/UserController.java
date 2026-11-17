@@ -1,6 +1,7 @@
 package com.estoque.api.controller;
 
 import com.estoque.api.dto.CreateUserRequestDTO;
+import com.estoque.api.dto.CreateUserResponseDTO;
 import com.estoque.api.dto.UserResponseDTO;
 import com.estoque.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +28,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@RequestBody CreateUserRequestDTO data) {
-        UserResponseDTO user = userService.createUser(data);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<CreateUserResponseDTO> createUser(@RequestBody CreateUserRequestDTO data) {
+        CreateUserResponseDTO result = userService.createUser(data);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/{id}/provision-auth0")
+    public ResponseEntity<CreateUserResponseDTO> retryAuth0Provisioning(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.retryAuth0Provisioning(id));
     }
 
     @DeleteMapping("/{id}")
