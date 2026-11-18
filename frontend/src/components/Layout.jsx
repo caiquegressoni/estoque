@@ -14,6 +14,36 @@ export default function Layout({ children }) {
   const [isRefreshingAlerts, setIsRefreshingAlerts] = useState(false);
   const alertsDropdownRef = useRef(null);
 
+  // Estado do Menu Lateral Recolhível
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = () => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const getAlerts = async () => {
     const response = await request('/alerts');
     return response.ok ? response.json() : null;
@@ -153,9 +183,9 @@ export default function Layout({ children }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-canvas)', color: 'var(--text-primary)' }}>
       
-      {/* SIDEBAR FIXA MODERNA */}
+      {/* SIDEBAR FIXA MODERNA & RECOLHÍVEL */}
       <aside style={{ 
-        width: '264px', 
+        width: isCollapsed ? '64px' : '240px', 
         backgroundColor: 'var(--bg-surface)', 
         borderRight: '1px solid var(--border-subtle)', 
         display: 'flex', 
@@ -165,67 +195,114 @@ export default function Layout({ children }) {
         height: '100vh',
         boxSizing: 'border-box',
         zIndex: 50,
-        flexShrink: 0
+        flexShrink: 0,
+        transition: 'width 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+        overflow: 'hidden'
       }}>
         
-        {/* Topo / Marca */}
-        <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Topo / Marca & Botão de Recolher */}
+        <div style={{ 
+          padding: isCollapsed ? '16px 12px' : '16px 16px', 
+          borderBottom: '1px solid var(--border-subtle)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: isCollapsed ? 'center' : 'space-between',
+          minHeight: '64px',
+          boxSizing: 'border-box'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
             <div style={{ 
-              width: '34px', 
-              height: '34px', 
+              width: '32px', 
+              height: '32px', 
               borderRadius: '8px', 
               background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)', 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(56, 189, 248, 0.25)'
-            }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              boxShadow: '0 2px 10px rgba(56, 189, 248, 0.25)',
+              flexShrink: 0,
+              cursor: isCollapsed ? 'pointer' : 'default'
+            }}
+            onClick={isCollapsed ? toggleSidebar : undefined}
+            title={isCollapsed ? 'Expandir menu (Ctrl+B)' : undefined}
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
               </svg>
             </div>
-            <div>
-              <h2 style={{ fontSize: '16px', fontWeight: '700', letterSpacing: '-0.02em', color: '#fff', lineHeight: 1.1 }}>
-                Betta
-              </h2>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '600' }}>
-                Almoxarifado
-              </span>
-            </div>
+            {!isCollapsed && (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                <h2 style={{ fontSize: '14.5px', fontWeight: '700', letterSpacing: '-0.02em', color: '#fff', lineHeight: 1.1 }}>
+                  Betta
+                </h2>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '600' }}>
+                  Almoxarifado
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Card do Usuário Logado */}
+          {!isCollapsed && (
+            <button
+              onClick={toggleSidebar}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                padding: '5px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+              title="Recolher menu (Ctrl+B)"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+                <polyline points="15 10 13 12 15 14" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Card do Usuário Logado */}
+        {!isCollapsed ? (
           <div style={{ 
-            marginTop: '18px', 
-            padding: '10px 12px', 
+            margin: '12px 14px', 
+            padding: '8px 10px', 
             backgroundColor: 'var(--bg-surface-subtle)', 
-            borderRadius: '10px', 
+            borderRadius: '9px', 
             border: '1px solid var(--border-subtle)',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px'
+            gap: '9px'
           }}>
             <div style={{ 
-              width: '32px', 
-              height: '32px', 
+              width: '28px', 
+              height: '28px', 
               borderRadius: '50%', 
-              backgroundColor: userIsAdmin ? 'rgba(56, 189, 248, 0.15)' : 'rgba(148, 163, 184, 0.15)',
-              border: userIsAdmin ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(148, 163, 184, 0.25)',
+              backgroundColor: userIsAdmin ? 'rgba(56, 189, 248, 0.12)' : 'rgba(148, 163, 184, 0.12)',
+              border: userIsAdmin ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(148, 163, 184, 0.2)',
               color: userIsAdmin ? '#38bdf8' : '#cbd5e1',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: '700',
-              fontSize: '12px'
+              fontSize: '11px',
+              flexShrink: 0
             }}>
               {userInitials}
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ 
-                fontSize: '13px', 
+                fontSize: '12px', 
                 fontWeight: '600', 
                 color: 'var(--text-primary)', 
                 whiteSpace: 'nowrap', 
@@ -234,16 +311,16 @@ export default function Layout({ children }) {
               }}>
                 {currentUser?.fullName || currentUser?.username || 'Usuário'}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '1px' }}>
                 <span style={{
-                  width: '6px',
-                  height: '6px',
+                  width: '5px',
+                  height: '5px',
                   borderRadius: '50%',
                   backgroundColor: userIsAdmin ? '#38bdf8' : '#10b981'
                 }} />
                 <span style={{ 
-                  fontSize: '11px', 
-                  color: 'var(--text-secondary)',
+                  fontSize: '10px', 
+                  color: 'var(--text-muted)',
                   fontWeight: '500'
                 }}>
                   {userIsAdmin ? 'Administrador' : 'Operador'}
@@ -251,66 +328,104 @@ export default function Layout({ children }) {
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div style={{ padding: '12px 0', display: 'flex', justifyContent: 'center' }}>
+            <div 
+              style={{ 
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%', 
+                backgroundColor: userIsAdmin ? 'rgba(56, 189, 248, 0.12)' : 'rgba(148, 163, 184, 0.12)',
+                border: userIsAdmin ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(148, 163, 184, 0.2)',
+                color: userIsAdmin ? '#38bdf8' : '#cbd5e1',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: '700',
+                fontSize: '11px'
+              }}
+              title={`${currentUser?.fullName || currentUser?.username} (${userIsAdmin ? 'Admin' : 'Operador'})`}
+            >
+              {userInitials}
+            </div>
+          </div>
+        )}
 
         {/* Links de Navegação */}
-        <nav style={{ flex: 1, padding: '18px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <div style={{ padding: '0 10px 8px 10px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>
-            Navegação
-          </div>
+        <nav style={{ flex: 1, padding: isCollapsed ? '10px 8px' : '12px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {!isCollapsed && (
+            <div style={{ padding: '0 8px 6px 8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>
+              Menu
+            </div>
+          )}
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
+                title={isCollapsed ? item.label : undefined}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
-                  padding: '10px 14px',
+                  justifyContent: isCollapsed ? 'center' : 'flex-start',
+                  gap: isCollapsed ? '0px' : '9px',
+                  padding: isCollapsed ? '10px 0' : '9px 12px',
                   borderRadius: '8px',
                   textDecoration: 'none',
-                  fontSize: '13.5px',
+                  fontSize: '13px',
                   fontWeight: isActive ? '600' : '500',
                   color: isActive ? '#fff' : 'var(--text-secondary)',
-                  backgroundColor: isActive ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
-                  border: isActive ? '1px solid rgba(56, 189, 248, 0.2)' : '1px solid transparent',
+                  backgroundColor: isActive ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+                  border: isActive ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
                   transition: 'all 0.15s ease'
                 }}
+                onMouseEnter={e => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.currentTarget.style.color = '#fff';
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                  }
+                }}
               >
-                <span style={{ color: isActive ? '#38bdf8' : 'var(--text-muted)' }}>
+                <span style={{ color: isActive ? '#38bdf8' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
                   {item.icon}
                 </span>
-                <span>{item.label}</span>
+                {!isCollapsed && <span>{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
         {/* Rodapé da Sidebar com Botão de Logout */}
-        <div style={{ padding: '16px', borderTop: '1px solid var(--border-subtle)' }}>
+        <div style={{ padding: isCollapsed ? '12px 8px' : '14px', borderTop: '1px solid var(--border-subtle)' }}>
           <button
             onClick={handleLogout}
+            title={isCollapsed ? 'Encerrar Sessão' : undefined}
             style={{
               width: '100%',
-              padding: '9px',
+              padding: isCollapsed ? '8px 0' : '8px',
               backgroundColor: 'transparent',
               color: 'var(--text-secondary)',
               border: '1px solid var(--border-subtle)',
-              borderRadius: '8px',
+              borderRadius: '7px',
               cursor: 'pointer',
               fontWeight: '500',
-              fontSize: '13px',
+              fontSize: '12.5px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px',
+              gap: isCollapsed ? '0px' : '7px',
               transition: 'all 0.15s ease'
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = 'rgba(244, 63, 94, 0.1)';
-              e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.25)';
+              e.currentTarget.style.backgroundColor = 'rgba(244, 63, 94, 0.08)';
+              e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.2)';
               e.currentTarget.style.color = '#f43f5e';
             }}
             onMouseLeave={e => {
@@ -319,12 +434,12 @@ export default function Layout({ children }) {
               e.currentTarget.style.color = 'var(--text-secondary)';
             }}
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
-            Encerrar Sessão
+            {!isCollapsed && <span>Encerrar Sessão</span>}
           </button>
         </div>
       </aside>
@@ -334,49 +449,85 @@ export default function Layout({ children }) {
         
         {/* TOP BAR / HEADER CORPORATIVO */}
         <header style={{
-          height: '62px',
+          height: '56px',
           borderBottom: '1px solid var(--border-subtle)',
-          backgroundColor: 'rgba(16, 23, 38, 0.75)',
-          backdropFilter: 'blur(16px)',
+          backgroundColor: 'rgba(15, 19, 28, 0.72)',
+          backdropFilter: 'blur(20px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 36px',
+          padding: '0 32px',
           zIndex: 40,
           flexShrink: 0
         }}>
           {/* Breadcrumb Contextual */}
-          <div>
-            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {isCollapsed && (
+              <button
+                onClick={toggleSidebar}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid var(--border-hairline)',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginRight: '6px',
+                  fontSize: '11px',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = '#fff';
+                  e.currentTarget.style.borderColor = 'var(--border-medium)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                  e.currentTarget.style.borderColor = 'var(--border-hairline)';
+                }}
+                title="Expandir menu lateral (Ctrl+B)"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <line x1="9" y1="3" x2="9" y2="21" />
+                  <polyline points="13 10 15 12 13 14" />
+                </svg>
+                <span>Menu</span>
+              </button>
+            )}
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '500' }}>
               {pageInfo.category}
-            </div>
-            <div style={{ fontSize: '14.5px', fontWeight: '700', color: '#fff', letterSpacing: '-0.01em', marginTop: '1px' }}>
+            </span>
+            <span style={{ color: 'var(--border-medium)', fontSize: '12px' }}>/</span>
+            <span style={{ fontSize: '13.5px', fontWeight: '600', color: '#fff', letterSpacing: '-0.01em' }}>
               {pageInfo.title}
-            </div>
+            </span>
           </div>
 
           {/* Seção Direita: Status da Operação + Sininho de Alertas */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative' }} ref={alertsDropdownRef}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', position: 'relative' }} ref={alertsDropdownRef}>
             
             {/* Badge de Status do Sistema */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '5px 11px',
+              padding: '4px 10px',
               borderRadius: '999px',
-              backgroundColor: 'rgba(16, 185, 129, 0.08)',
-              border: '1px solid rgba(16, 185, 129, 0.2)',
-              fontSize: '11.5px',
+              backgroundColor: 'rgba(16, 185, 129, 0.06)',
+              border: '1px solid rgba(16, 185, 129, 0.18)',
+              fontSize: '11px',
               color: 'var(--accent-emerald)',
               fontWeight: '500'
             }}>
               <span style={{ 
-                width: '6px', 
-                height: '6px', 
+                width: '5px', 
+                height: '5px', 
                 borderRadius: '50%', 
                 backgroundColor: 'var(--accent-emerald)', 
-                boxShadow: '0 0 6px var(--accent-emerald)' 
+                boxShadow: '0 0 8px var(--accent-emerald)' 
               }} />
               <span>Operação Ativa</span>
             </div>
@@ -387,11 +538,11 @@ export default function Layout({ children }) {
               title="Central de Alertas e Reposição"
               style={{
                 position: 'relative',
-                width: '38px',
-                height: '38px',
-                borderRadius: '10px',
-                backgroundColor: isAlertsOpen ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-                border: isAlertsOpen ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid var(--border-subtle)',
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                backgroundColor: isAlertsOpen ? 'rgba(56, 189, 248, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                border: isAlertsOpen ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid var(--border-subtle)',
                 color: isAlertsOpen ? '#fff' : 'var(--text-secondary)',
                 cursor: 'pointer',
                 display: 'flex',
@@ -400,18 +551,18 @@ export default function Layout({ children }) {
                 transition: 'all 0.15s ease'
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
                 e.currentTarget.style.color = '#fff';
               }}
               onMouseLeave={e => {
                 if (!isAlertsOpen) {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
                   e.currentTarget.style.color = 'var(--text-secondary)';
                 }
               }}
             >
               {/* Ícone de Sino */}
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
@@ -420,22 +571,22 @@ export default function Layout({ children }) {
               {totalAlerts > 0 && (
                 <span style={{
                   position: 'absolute',
-                  top: '-3px',
-                  right: '-3px',
-                  minWidth: '18px',
-                  height: '18px',
+                  top: '-2px',
+                  right: '-2px',
+                  minWidth: '16px',
+                  height: '16px',
                   padding: '0 4px',
                   borderRadius: '999px',
                   backgroundColor: criticalCount > 0 ? '#f43f5e' : 'var(--accent-amber)',
                   color: '#fff',
-                  fontSize: '10px',
+                  fontSize: '9.5px',
                   fontWeight: '800',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: criticalCount > 0 
-                    ? '0 0 10px rgba(244, 63, 94, 0.7)' 
-                    : '0 0 8px rgba(245, 158, 11, 0.5)',
+                    ? '0 0 8px rgba(244, 63, 94, 0.6)' 
+                    : '0 0 6px rgba(245, 158, 11, 0.4)',
                   animation: criticalCount > 0 ? 'bellPulse 1.8s infinite' : 'none'
                 }}>
                   {totalAlerts}

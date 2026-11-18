@@ -19,6 +19,7 @@ function Products() {
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
   const [editingId, setEditingId] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Estados do Modal de Movimentação de Estoque
   const [movementModalOpen, setMovementModalOpen] = useState(false);
@@ -66,6 +67,17 @@ function Products() {
     };
   }, []);
 
+  // Fecha o pop-up com tecla ESC
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isDrawerOpen) {
+        handleCloseDrawer();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDrawerOpen]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const isEditing = editingId !== null;
@@ -89,7 +101,7 @@ function Products() {
       });
 
       if (response.ok) {
-        handleCancelEdit();
+        handleCloseDrawer();
         fetchProducts();
         window.dispatchEvent(new Event('stock-updated'));
       } else {
@@ -126,6 +138,17 @@ function Products() {
     setObservations(product.observations || '');
     setCategory(product.category || '');
     setLocation(product.location || '');
+    setIsDrawerOpen(true);
+  };
+
+  const handleOpenCreateDrawer = () => {
+    handleCancelEdit();
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    handleCancelEdit();
   };
 
   const handleCancelEdit = () => {
@@ -307,321 +330,114 @@ Almoxarifado & Controle de Estoque`;
     <div style={{ maxWidth: '1240px', margin: '0 auto' }}>
       
       {/* Topo da Página com Botões de Ação */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', letterSpacing: '-0.02em', color: '#fff' }}>
-            Estoque & Almoxarifado
+          <h1 style={{ fontSize: '24px', fontWeight: '700', letterSpacing: '-0.025em', color: '#fff' }}>
+            Inventário & Almoxarifado
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
-            Controle de inventário, posições de prateleiras e ponto de reposição.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '3px' }}>
+            Catálogo técnico, níveis de estoque e rastreabilidade por notas fiscais.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button 
             onClick={() => setQuotationModalOpen(true)}
-            style={{
-              backgroundColor: lowStockCount > 0 ? 'rgba(244, 63, 94, 0.12)' : 'rgba(255, 255, 255, 0.04)',
-              color: lowStockCount > 0 ? '#f43f5e' : 'var(--text-secondary)',
-              border: lowStockCount > 0 ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid var(--border-subtle)',
-              padding: '9px 16px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: '600',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.18s ease'
-            }}
+            className="btn-ghost"
+            title="Visualizar itens abaixo do estoque mínimo para reposição"
           >
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: lowStockCount > 0 ? '#f43f5e' : 'var(--text-muted)' }} />
-            Cotação de Reposição ({lowStockCount})
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: lowStockCount > 0 ? '#f43f5e' : 'var(--text-muted)' }} />
+            Cotação ({lowStockCount})
           </button>
           <button 
             onClick={handleExportCSV} 
-            style={{ 
-              backgroundColor: 'rgba(56, 189, 248, 0.1)', 
-              color: 'var(--accent-cyan)', 
-              border: '1px solid rgba(56, 189, 248, 0.25)', 
-              padding: '9px 16px', 
-              borderRadius: '8px', 
-              cursor: 'pointer', 
-              fontWeight: '600', 
-              fontSize: '13px',
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '6px' 
-            }}
+            className="btn-ghost"
+            title="Exportar inventário completo para planilha CSV"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             Exportar CSV
           </button>
+          <button 
+            onClick={handleOpenCreateDrawer}
+            className="btn-primary"
+            title="Cadastrar novo item no almoxarifado"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Novo Produto
+          </button>
         </div>
       </div>
 
       {/* CARDS DE MÉTRICAS (KPIs) MINIMALISTAS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '24px' }}>
         
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '20px 22px', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-        }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '600' }}>
+        <div className="glass-card" style={{ padding: '18px 20px' }}>
+          <span className="kpi-title">
             Itens Cadastrados
           </span>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-            <h3 style={{ fontSize: '26px', fontWeight: '700', color: '#fff', letterSpacing: '-0.02em' }}>{totalProducts}</h3>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>SKUs ativos</span>
+            <h3 className="tabular-nums" style={{ fontSize: '24px', fontWeight: '700', color: '#fff', letterSpacing: '-0.03em' }}>{totalProducts}</h3>
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>SKUs ativos</span>
           </div>
         </div>
 
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '20px 22px', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-        }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '600' }}>
+        <div className="glass-card" style={{ padding: '18px 20px' }}>
+          <span className="kpi-title">
             Volume Físico Total
           </span>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-            <h3 style={{ fontSize: '26px', fontWeight: '700', color: '#fff', letterSpacing: '-0.02em' }}>
-              {totalQuantity} <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)' }}>un</span>
+            <h3 className="tabular-nums" style={{ fontSize: '24px', fontWeight: '700', color: '#fff', letterSpacing: '-0.03em' }}>
+              {totalQuantity} <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-muted)' }}>un</span>
             </h3>
-            <span style={{ fontSize: '12px', color: 'var(--accent-emerald)', fontWeight: '500' }}>Saldo geral</span>
+            <span style={{ fontSize: '11px', color: 'var(--accent-emerald)', fontWeight: '600' }}>Saldo geral</span>
           </div>
         </div>
 
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '20px 22px', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-        }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '600' }}>
+        <div className="glass-card" style={{ padding: '18px 20px' }}>
+          <span className="kpi-title">
             Valor do Patrimônio
           </span>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-            <h3 style={{ fontSize: '26px', fontWeight: '700', color: '#fff', letterSpacing: '-0.02em' }}>
+            <h3 className="tabular-nums" style={{ fontSize: '24px', fontWeight: '700', color: '#fff', letterSpacing: '-0.03em' }}>
               R$ {totalStockValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
-            <span style={{ fontSize: '12px', color: 'var(--accent-cyan)', fontWeight: '500' }}>Custo total</span>
+            <span style={{ fontSize: '11px', color: 'var(--accent-cyan)', fontWeight: '600' }}>Custo total</span>
           </div>
         </div>
 
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '20px 22px', 
-          borderRadius: '12px', 
-          border: lowStockCount > 0 ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid var(--border-subtle)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+        <div className="glass-card" style={{ 
+          padding: '18px 20px',
+          borderColor: lowStockCount > 0 ? 'rgba(244, 63, 94, 0.28)' : 'var(--border-hairline)'
         }}>
-          <span style={{ fontSize: '11px', color: lowStockCount > 0 ? '#f43f5e' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '600' }}>
+          <span className="kpi-title" style={{ color: lowStockCount > 0 ? '#f43f5e' : 'var(--text-muted)' }}>
             Itens Críticos (Reposição)
           </span>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-            <h3 style={{ fontSize: '26px', fontWeight: '700', color: lowStockCount > 0 ? '#f43f5e' : '#fff', letterSpacing: '-0.02em' }}>
+            <h3 className="tabular-nums" style={{ fontSize: '24px', fontWeight: '700', color: lowStockCount > 0 ? '#f43f5e' : '#fff', letterSpacing: '-0.03em' }}>
               {lowStockCount}
             </h3>
             <span style={{ 
-              fontSize: '12px', 
+              fontSize: '11px', 
               color: lowStockCount > 0 ? '#f43f5e' : 'var(--accent-emerald)', 
               fontWeight: '600',
               display: 'flex',
               alignItems: 'center',
               gap: '4px'
             }}>
-              {lowStockCount > 0 ? '● Atenção' : '● Em dia'}
+              {lowStockCount > 0 ? '● Reposição' : '● Em dia'}
             </span>
           </div>
         </div>
 
       </div>
 
-      {/* Formulário de Produto Minimalista */}
-      <section style={{ 
-        backgroundColor: 'var(--bg-surface)', 
-        padding: '24px', 
-        borderRadius: '12px', 
-        marginBottom: '32px', 
-        border: '1px solid var(--border-subtle)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)' 
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#fff', letterSpacing: '-0.01em' }}>
-            {editingId ? 'Editar Item do Estoque' : 'Cadastrar Novo Item'}
-          </h2>
-          {editingId && (
-            <span style={{ fontSize: '12px', color: 'var(--accent-amber)', fontWeight: '500' }}>
-              Modo de Edição Ativo
-            </span>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', alignItems: 'end' }}>
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Nome do Produto *
-            </label>
-            <input 
-              placeholder="Ex: Teclado Mecânico" 
-              value={name} 
-              onChange={e => setName(e.target.value)} 
-              required 
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', fontSize: '13px' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Categoria
-            </label>
-            <input 
-              placeholder="Ex: Informática, Cabos" 
-              value={category} 
-              onChange={e => setCategory(e.target.value)} 
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', fontSize: '13px' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Localização Física
-            </label>
-            <input 
-              placeholder="Ex: Prat. B2 - Gav. 04" 
-              value={location} 
-              onChange={e => setLocation(e.target.value)} 
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', fontSize: '13px' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Preço Unitário (R$) *
-            </label>
-            <input 
-              type="number" 
-              step="0.01" 
-              placeholder="0.00" 
-              value={price} 
-              onChange={e => setPrice(e.target.value)} 
-              required 
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', fontSize: '13px' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Saldo Atual *
-            </label>
-            <NumberStepper 
-              value={quantity} 
-              onChange={setQuantity} 
-              min={0} 
-              placeholder="0" 
-              unit="un" 
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Estoque Mínimo *
-            </label>
-            <NumberStepper 
-              value={minQuantity} 
-              onChange={setMinQuantity} 
-              min={0} 
-              placeholder="5" 
-              unit="un" 
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              NF-e Origem
-            </label>
-            <input 
-              placeholder="Ex: 555, 111" 
-              value={invoices} 
-              onChange={e => setInvoices(e.target.value)} 
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', fontSize: '13px' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Descrição Breve
-            </label>
-            <input 
-              placeholder="Ex: Conector banhado a ouro" 
-              value={description} 
-              onChange={e => setDescription(e.target.value)} 
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', fontSize: '13px' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Observações
-            </label>
-            <input 
-              placeholder="Ex: Fornecedor Betta, 1 ano garantia" 
-              value={observations} 
-              onChange={e => setObservations(e.target.value)} 
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--bg-surface-subtle)', color: '#fff', fontSize: '13px' }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', gap: '8px', gridColumn: '1 / -1', marginTop: '6px' }}>
-            <button 
-              type="submit" 
-              style={{ 
-                flex: 1, 
-                backgroundColor: editingId ? '#0284c7' : 'var(--accent-emerald)', 
-                color: '#fff', 
-                border: 'none', 
-                borderRadius: '8px', 
-                cursor: 'pointer', 
-                fontWeight: '600', 
-                fontSize: '13px',
-                padding: '11px 18px',
-                boxShadow: editingId ? '0 4px 12px rgba(2, 132, 199, 0.25)' : '0 4px 12px rgba(16, 185, 129, 0.25)'
-              }}
-            >
-              {editingId ? 'Salvar Alterações' : 'Adicionar ao Estoque'}
-            </button>
-            {editingId && (
-              <button 
-                type="button" 
-                onClick={handleCancelEdit} 
-                style={{ 
-                  backgroundColor: 'transparent', 
-                  color: 'var(--text-secondary)', 
-                  border: '1px solid var(--border-subtle)', 
-                  borderRadius: '8px', 
-                  cursor: 'pointer', 
-                  padding: '11px 18px',
-                  fontSize: '13px' 
-                }}
-              >
-                Cancelar
-              </button>
-            )}
-          </div>
-        </form>
-      </section>
-
-      {/* BARRA DE PESQUISA & FILTROS (Estilo Segmented Control) */}
+      {/* BARRA DE PESQUISA & FILTROS (Estilo Segmented Control Minimalista) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '14px' }}>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -629,55 +445,67 @@ Almoxarifado & Controle de Estoque`;
           {/* Segmented Control de Status */}
           <div style={{ 
             display: 'flex', 
-            backgroundColor: 'var(--bg-surface-subtle)', 
+            backgroundColor: 'rgba(255, 255, 255, 0.03)', 
             borderRadius: '8px', 
             padding: '3px', 
-            border: '1px solid var(--border-subtle)' 
+            border: '1px solid var(--border-hairline)' 
           }}>
             <button
               onClick={() => setStatusFilter('ALL')}
               style={{
                 backgroundColor: statusFilter === 'ALL' ? 'var(--bg-surface-elevated)' : 'transparent',
                 color: statusFilter === 'ALL' ? '#fff' : 'var(--text-secondary)',
-                border: 'none', 
-                padding: '6px 14px', 
+                border: statusFilter === 'ALL' ? '1px solid var(--border-hairline)' : '1px solid transparent', 
+                padding: '5px 12px', 
                 borderRadius: '6px', 
                 cursor: 'pointer', 
-                fontSize: '12.5px', 
-                fontWeight: statusFilter === 'ALL' ? '600' : '500'
+                fontSize: '12px', 
+                fontWeight: statusFilter === 'ALL' ? '600' : '500',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
               }}
             >
-              Todos ({products.length})
+              Todos <span className="tabular-nums" style={{ opacity: 0.6, fontSize: '11px' }}>{products.length}</span>
             </button>
             <button
               onClick={() => setStatusFilter('LOW')}
               style={{
-                backgroundColor: statusFilter === 'LOW' ? 'rgba(244, 63, 94, 0.15)' : 'transparent',
-                color: statusFilter === 'LOW' ? '#f43f5e' : 'var(--text-secondary)',
-                border: 'none', 
-                padding: '6px 14px', 
+                backgroundColor: statusFilter === 'LOW' ? 'rgba(244, 63, 94, 0.12)' : 'transparent',
+                color: statusFilter === 'LOW' ? '#fb7185' : 'var(--text-secondary)',
+                border: statusFilter === 'LOW' ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid transparent', 
+                padding: '5px 12px', 
                 borderRadius: '6px', 
                 cursor: 'pointer', 
-                fontSize: '12.5px', 
-                fontWeight: statusFilter === 'LOW' ? '600' : '500'
+                fontSize: '12px', 
+                fontWeight: statusFilter === 'LOW' ? '600' : '500',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
               }}
             >
-              Críticos ({lowStockCount})
+              Críticos <span className="tabular-nums" style={{ opacity: 0.8, fontSize: '11px' }}>{lowStockCount}</span>
             </button>
             <button
               onClick={() => setStatusFilter('OK')}
               style={{
-                backgroundColor: statusFilter === 'OK' ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
-                color: statusFilter === 'OK' ? '#10b981' : 'var(--text-secondary)',
-                border: 'none', 
-                padding: '6px 14px', 
+                backgroundColor: statusFilter === 'OK' ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
+                color: statusFilter === 'OK' ? '#34d399' : 'var(--text-secondary)',
+                border: statusFilter === 'OK' ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent', 
+                padding: '5px 12px', 
                 borderRadius: '6px', 
                 cursor: 'pointer', 
-                fontSize: '12.5px', 
-                fontWeight: statusFilter === 'OK' ? '600' : '500'
+                fontSize: '12px', 
+                fontWeight: statusFilter === 'OK' ? '600' : '500',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
               }}
             >
-              Regular ({products.length - lowStockCount})
+              Regular <span className="tabular-nums" style={{ opacity: 0.8, fontSize: '11px' }}>{products.length - lowStockCount}</span>
             </button>
           </div>
 
@@ -687,13 +515,14 @@ Almoxarifado & Controle de Estoque`;
               value={selectedCategory}
               onChange={e => setSelectedCategory(e.target.value)}
               style={{ 
-                padding: '7px 12px', 
+                padding: '6px 12px', 
                 borderRadius: '8px', 
-                border: '1px solid var(--border-subtle)', 
-                backgroundColor: 'var(--bg-surface-subtle)', 
-                color: '#fff', 
-                fontSize: '12.5px',
-                cursor: 'pointer'
+                border: '1px solid var(--border-hairline)', 
+                backgroundColor: 'rgba(255, 255, 255, 0.03)', 
+                color: 'var(--text-secondary)', 
+                fontSize: '12px',
+                cursor: 'pointer',
+                outline: 'none'
               }}
             >
               <option value="ALL">Todas as Categorias</option>
@@ -705,10 +534,10 @@ Almoxarifado & Controle de Estoque`;
         </div>
 
         {/* Input de Busca Minimalista */}
-        <div style={{ position: 'relative', width: '360px' }}>
+        <div style={{ position: 'relative', width: '320px' }}>
           <svg 
-            width="15" 
-            height="15" 
+            width="14" 
+            height="14" 
             viewBox="0 0 24 24" 
             fill="none" 
             stroke="var(--text-muted)" 
@@ -727,40 +556,55 @@ Almoxarifado & Controle de Estoque`;
             onChange={e => setSearchTerm(e.target.value)}
             style={{ 
               width: '100%', 
-              padding: '9px 14px 9px 36px', 
+              padding: '8px 46px 8px 34px', 
               borderRadius: '8px', 
-              border: '1px solid var(--border-subtle)', 
-              backgroundColor: 'var(--bg-surface-subtle)', 
+              border: '1px solid var(--border-hairline)', 
+              backgroundColor: 'rgba(255, 255, 255, 0.03)', 
               color: '#fff', 
-              fontSize: '13px' 
+              fontSize: '12.5px',
+              outline: 'none',
+              transition: 'border-color 0.15s ease'
             }}
+            onFocus={e => e.target.style.borderColor = 'var(--accent-blue)'}
+            onBlur={e => e.target.style.borderColor = 'var(--border-hairline)'}
           />
+          <kbd style={{ 
+            position: 'absolute', 
+            right: '10px', 
+            top: '50%', 
+            transform: 'translateY(-50%)', 
+            fontSize: '10px', 
+            padding: '2px 5px', 
+            borderRadius: '4px', 
+            backgroundColor: 'rgba(255, 255, 255, 0.06)', 
+            color: 'var(--text-muted)', 
+            border: '1px solid var(--border-hairline)',
+            pointerEvents: 'none'
+          }}>⌘K</kbd>
         </div>
       </div>
 
       {/* TABELA DE PRODUTOS MINIMALISTA */}
-      <section style={{ 
-        backgroundColor: 'var(--bg-surface)', 
+      <section className="glass-card" style={{ 
         borderRadius: '12px', 
         overflow: 'hidden', 
-        border: '1px solid var(--border-subtle)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)' 
+        border: '1px solid var(--border-hairline)'
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ backgroundColor: 'var(--bg-surface-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>Item / Categoria</th>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>Localização</th>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>NF-e Origem</th>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>Preço Unit.</th>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>Saldo / Mínimo</th>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600', textAlign: 'right' }}>Ações</th>
+            <tr style={{ backgroundColor: 'rgba(255, 255, 255, 0.02)', borderBottom: '1px solid var(--border-hairline)' }}>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600' }}>Item / Categoria</th>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600' }}>Localização</th>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600' }}>NF-e Origem</th>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600' }}>Preço Unit.</th>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600' }}>Saldo / Mínimo</th>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600', textAlign: 'right' }}>Ações</th>
             </tr>
           </thead>
           <tbody>
             {filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13.5px' }}>
+                <td colSpan="6" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
                   {searchTerm ? 'Nenhum item encontrado para esta busca.' : 'Nenhum item cadastrado no inventário.'}
                 </td>
               </tr>
@@ -772,105 +616,110 @@ Almoxarifado & Controle de Estoque`;
                 return (
                   <tr 
                     key={p.id} 
-                    style={{ borderBottom: '1px solid var(--border-subtle)', transition: 'background-color 0.15s ease' }}
+                    style={{ borderBottom: '1px solid var(--border-hairline)', transition: 'background-color 0.15s ease' }}
                     onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <td style={{ padding: '14px 18px' }}>
-                      <div style={{ fontWeight: '600', color: '#fff', fontSize: '13.5px' }}>{p.name}</div>
-                      <div style={{ display: 'flex', gap: '6px', marginTop: '4px', alignItems: 'center' }}>
+                    <td style={{ padding: '12px 18px' }}>
+                      <div style={{ fontWeight: '600', color: '#fff', fontSize: '13px' }}>{p.name}</div>
+                      <div style={{ display: 'flex', gap: '6px', marginTop: '3px', alignItems: 'center' }}>
                         {p.category && (
                           <span style={{ 
-                            backgroundColor: 'rgba(56, 189, 248, 0.1)', 
+                            backgroundColor: 'rgba(56, 189, 248, 0.08)', 
                             color: 'var(--accent-cyan)', 
-                            padding: '2px 7px', 
+                            border: '1px solid rgba(56, 189, 248, 0.18)',
+                            padding: '1px 6px', 
                             borderRadius: '4px', 
-                            fontSize: '11px', 
-                            fontWeight: '600' 
+                            fontSize: '10.5px', 
+                            fontWeight: '500' 
                           }}>
                             {p.category}
                           </span>
                         )}
-                        {p.description && <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{p.description}</span>}
+                        {p.description && <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)' }}>{p.description}</span>}
                       </div>
                     </td>
-                    <td style={{ padding: '14px 18px' }}>
+                    <td style={{ padding: '12px 18px' }}>
                       {p.location ? (
                         <span style={{ 
-                          backgroundColor: 'rgba(255, 255, 255, 0.04)', 
+                          backgroundColor: 'rgba(255, 255, 255, 0.03)', 
                           color: '#e2e8f0', 
-                          padding: '3px 9px', 
-                          borderRadius: '6px', 
-                          fontSize: '12px', 
+                          padding: '2px 8px', 
+                          borderRadius: '4px', 
+                          fontSize: '11.5px', 
                           fontWeight: '500',
-                          border: '1px solid var(--border-subtle)'
+                          border: '1px solid var(--border-hairline)'
                         }}>
                           {p.location}
                         </span>
                       ) : (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>-</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>-</span>
                       )}
                     </td>
-                    <td style={{ padding: '14px 18px' }}>
+                    <td style={{ padding: '12px 18px' }}>
                       {p.invoices ? (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                           {p.invoices.split(',').map((nf, idx) => (
                             <span key={idx} style={{ 
-                              backgroundColor: 'rgba(2, 132, 199, 0.15)', 
+                              backgroundColor: 'rgba(2, 132, 199, 0.12)', 
                               color: '#38bdf8', 
-                              padding: '2px 7px', 
+                              border: '1px solid rgba(2, 132, 199, 0.25)',
+                              padding: '1px 6px', 
                               borderRadius: '4px', 
-                              fontSize: '11px', 
-                              fontWeight: '600' 
+                              fontSize: '10.5px', 
+                              fontWeight: '500' 
                             }}>
                               NF {nf.trim()}
                             </span>
                           ))}
                         </div>
                       ) : (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>-</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>-</span>
                       )}
                     </td>
-                    <td style={{ padding: '14px 18px', color: 'var(--text-primary)', fontSize: '13px', fontWeight: '500' }}>
+                    <td className="tabular-nums" style={{ padding: '12px 18px', color: 'var(--text-primary)', fontSize: '12.5px', fontWeight: '500' }}>
                       R$ {Number(p.price).toFixed(2)}
                     </td>
-                    <td style={{ padding: '14px 18px' }}>
+                    <td style={{ padding: '12px 18px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ 
-                          backgroundColor: isCritical ? 'rgba(244, 63, 94, 0.12)' : 'rgba(16, 185, 129, 0.12)', 
-                          color: isCritical ? '#f43f5e' : '#10b981',
+                        <span className="tabular-nums" style={{ 
+                          backgroundColor: isCritical ? 'rgba(244, 63, 94, 0.1)' : 'rgba(16, 185, 129, 0.1)', 
+                          color: isCritical ? '#fb7185' : '#34d399',
                           border: isCritical ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid rgba(16, 185, 129, 0.25)',
-                          padding: '3px 9px', 
+                          padding: '2px 8px', 
                           borderRadius: '999px', 
-                          fontSize: '11.5px',
+                          fontSize: '11px',
                           fontWeight: '600',
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '5px'
                         }}>
-                          <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: isCritical ? '#f43f5e' : '#10b981' }} />
+                          <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: isCritical ? '#fb7185' : '#34d399' }} />
                           {p.quantity} un
                         </span>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                        <span className="tabular-nums" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                           (mín: {min})
                         </span>
                       </div>
                     </td>
-                    <td style={{ padding: '14px 18px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      <div style={{ display: 'inline-flex', gap: '6px' }}>
+                    <td style={{ padding: '12px 18px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'inline-flex', gap: '5px' }}>
                         {/* MOVIMENTAR */}
                         <button 
                           onClick={() => openMovementModal(p)} 
                           style={{ 
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)', 
+                            backgroundColor: 'rgba(16, 185, 129, 0.08)', 
                             color: '#34d399', 
-                            border: '1px solid rgba(16, 185, 129, 0.25)', 
-                            padding: '6px 10px', 
-                            borderRadius: '6px', 
+                            border: '1px solid rgba(16, 185, 129, 0.2)', 
+                            padding: '4px 8px', 
+                            borderRadius: '5px', 
                             cursor: 'pointer', 
-                            fontWeight: '600',
-                            fontSize: '12px'
+                            fontWeight: '500',
+                            fontSize: '11.5px',
+                            transition: 'all 0.15s ease'
                           }}
+                          onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.16)'}
+                          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.08)'}
                           title="Registrar Entrada ou Saída"
                         >
                           Movimentar
@@ -880,15 +729,18 @@ Almoxarifado & Controle de Estoque`;
                         <button 
                           onClick={() => openReturnModal(p)} 
                           style={{ 
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)', 
+                            backgroundColor: 'rgba(99, 102, 241, 0.08)', 
                             color: '#a5b4fc', 
-                            border: '1px solid rgba(99, 102, 241, 0.25)', 
-                            padding: '6px 10px', 
-                            borderRadius: '6px', 
+                            border: '1px solid rgba(99, 102, 241, 0.2)', 
+                            padding: '4px 8px', 
+                            borderRadius: '5px', 
                             cursor: 'pointer', 
                             fontWeight: '500',
-                            fontSize: '12px'
+                            fontSize: '11.5px',
+                            transition: 'all 0.15s ease'
                           }}
+                          onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(99, 102, 241, 0.16)'}
+                          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(99, 102, 241, 0.08)'}
                           title="Gerar e-mail de devolução/RMA"
                         >
                           RMA
@@ -898,14 +750,23 @@ Almoxarifado & Controle de Estoque`;
                         <button 
                           onClick={() => handleEditClick(p)} 
                           style={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.04)', 
+                            backgroundColor: 'rgba(255, 255, 255, 0.03)', 
                             color: 'var(--text-secondary)', 
-                            border: '1px solid var(--border-subtle)', 
-                            padding: '6px 10px', 
-                            borderRadius: '6px', 
+                            border: '1px solid var(--border-hairline)', 
+                            padding: '4px 8px', 
+                            borderRadius: '5px', 
                             cursor: 'pointer', 
                             fontWeight: '500',
-                            fontSize: '12px'
+                            fontSize: '11.5px',
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.07)';
+                            e.currentTarget.style.color = '#fff';
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                            e.currentTarget.style.color = 'var(--text-secondary)';
                           }}
                           title="Editar"
                         >
@@ -916,15 +777,18 @@ Almoxarifado & Controle de Estoque`;
                         <button 
                           onClick={() => handleDeleteProduct(p.id)} 
                           style={{ 
-                            backgroundColor: 'rgba(244, 63, 94, 0.08)', 
-                            color: '#f43f5e', 
-                            border: '1px solid rgba(244, 63, 94, 0.2)', 
-                            padding: '6px 10px', 
-                            borderRadius: '6px', 
+                            backgroundColor: 'rgba(244, 63, 94, 0.06)', 
+                            color: '#fb7185', 
+                            border: '1px solid rgba(244, 63, 94, 0.18)', 
+                            padding: '4px 8px', 
+                            borderRadius: '5px', 
                             cursor: 'pointer', 
                             fontWeight: '500',
-                            fontSize: '12px'
+                            fontSize: '11.5px',
+                            transition: 'all 0.15s ease'
                           }}
+                          onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(244, 63, 94, 0.15)'}
+                          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(244, 63, 94, 0.06)'}
                           title="Excluir"
                         >
                           Excluir
@@ -1315,6 +1179,226 @@ Almoxarifado & Controle de Estoque`;
               )}
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* POP-UP / MODAL CENTRAL FLUIDO PARA CADASTRO / EDIÇÃO DE PRODUTO */}
+      {isDrawerOpen && (
+        <div className="modal-backdrop" onClick={handleCloseDrawer}>
+          <div 
+            className="modal-dialog" 
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header do Pop-up */}
+            <div style={{ 
+              padding: '18px 24px', 
+              borderBottom: '1px solid var(--border-hairline)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              backgroundColor: 'rgba(255, 255, 255, 0.015)'
+            }}>
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#fff', letterSpacing: '-0.015em' }}>
+                  {editingId ? 'Editar Item do Estoque' : 'Cadastrar Novo Item'}
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  {editingId ? 'Atualize as especificações, localização e saldos.' : 'Preencha os dados técnicos e saldo inicial do produto.'}
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <kbd style={{ 
+                  fontSize: '10px', 
+                  padding: '2px 5px', 
+                  borderRadius: '4px', 
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)', 
+                  color: 'var(--text-muted)',
+                  border: '1px solid var(--border-hairline)',
+                  pointerEvents: 'none'
+                }}>Esc</kbd>
+                <button 
+                  type="button" 
+                  onClick={handleCloseDrawer}
+                  style={{ 
+                    background: 'transparent', 
+                    border: 'none', 
+                    color: 'var(--text-muted)', 
+                    cursor: 'pointer',
+                    padding: '5px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = '#fff';
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = 'var(--text-muted)';
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                  title="Fechar (Esc)"
+                >
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Corpo do Formulário */}
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto' }}>
+                
+                <div>
+                  <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '5px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Nome do Produto *
+                  </label>
+                  <input 
+                    placeholder="Ex: Teclado Mecânico RGB" 
+                    value={name} 
+                    onChange={e => setName(e.target.value)} 
+                    required 
+                    autoFocus
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-hairline)', backgroundColor: 'rgba(255, 255, 255, 0.02)', color: '#fff', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '5px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Categoria
+                    </label>
+                    <input 
+                      placeholder="Ex: Informática, Cabos" 
+                      value={category} 
+                      onChange={e => setCategory(e.target.value)} 
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-hairline)', backgroundColor: 'rgba(255, 255, 255, 0.02)', color: '#fff', fontSize: '13px' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '5px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Localização Física
+                    </label>
+                    <input 
+                      placeholder="Ex: Prat. B2 - Gav. 04" 
+                      value={location} 
+                      onChange={e => setLocation(e.target.value)} 
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-hairline)', backgroundColor: 'rgba(255, 255, 255, 0.02)', color: '#fff', fontSize: '13px' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '5px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Preço Unitário (R$) *
+                    </label>
+                    <input 
+                      type="number" 
+                      step="0.01" 
+                      placeholder="0.00" 
+                      value={price} 
+                      onChange={e => setPrice(e.target.value)} 
+                      required 
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-hairline)', backgroundColor: 'rgba(255, 255, 255, 0.02)', color: '#fff', fontSize: '13px' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '5px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      NF-e Origem
+                    </label>
+                    <input 
+                      placeholder="Ex: 555, 111" 
+                      value={invoices} 
+                      onChange={e => setInvoices(e.target.value)} 
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-hairline)', backgroundColor: 'rgba(255, 255, 255, 0.02)', color: '#fff', fontSize: '13px' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '5px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Saldo Atual *
+                    </label>
+                    <NumberStepper 
+                      value={quantity} 
+                      onChange={setQuantity} 
+                      min={0} 
+                      placeholder="0" 
+                      unit="un" 
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '5px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Estoque Mínimo *
+                    </label>
+                    <NumberStepper 
+                      value={minQuantity} 
+                      onChange={setMinQuantity} 
+                      min={0} 
+                      placeholder="5" 
+                      unit="un" 
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '5px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Descrição Técnica
+                  </label>
+                  <input 
+                    placeholder="Ex: Conector banhado a ouro, cabo reforçado" 
+                    value={description} 
+                    onChange={e => setDescription(e.target.value)} 
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-hairline)', backgroundColor: 'rgba(255, 255, 255, 0.02)', color: '#fff', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '5px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Observações Internas
+                  </label>
+                  <textarea 
+                    rows="2"
+                    placeholder="Ex: Fornecedor Betta, lote com 1 ano de garantia" 
+                    value={observations} 
+                    onChange={e => setObservations(e.target.value)} 
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-hairline)', backgroundColor: 'rgba(255, 255, 255, 0.02)', color: '#fff', fontSize: '12.5px', resize: 'vertical' }}
+                  />
+                </div>
+
+              </div>
+
+              {/* Footer do Pop-up */}
+              <div style={{ 
+                padding: '16px 24px', 
+                borderTop: '1px solid var(--border-hairline)', 
+                display: 'flex', 
+                gap: '10px', 
+                justifyContent: 'flex-end',
+                backgroundColor: 'rgba(255, 255, 255, 0.015)'
+              }}>
+                <button 
+                  type="button" 
+                  onClick={handleCloseDrawer}
+                  className="btn-ghost"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn-primary"
+                >
+                  {editingId ? 'Salvar Alterações' : 'Cadastrar Item'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

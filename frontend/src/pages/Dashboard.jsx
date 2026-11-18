@@ -107,8 +107,8 @@ export default function Dashboard() {
           {/* Seletor Temporal Segmented Control */}
           <div style={{
             display: 'inline-flex',
-            backgroundColor: 'rgba(255, 255, 255, 0.04)',
-            border: '1px solid var(--border-subtle)',
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid var(--border-hairline)',
             borderRadius: '8px',
             padding: '3px',
             gap: '2px'
@@ -129,12 +129,12 @@ export default function Dashboard() {
                     padding: '5px 12px',
                     borderRadius: '6px',
                     fontSize: '11.5px',
-                    fontWeight: isActive ? '700' : '500',
+                    fontWeight: isActive ? '600' : '500',
                     cursor: 'pointer',
-                    border: 'none',
+                    border: isActive ? '1px solid var(--border-hairline)' : '1px solid transparent',
                     transition: 'all 0.15s ease',
-                    backgroundColor: isActive ? 'var(--accent-cyan)' : 'transparent',
-                    color: isActive ? '#090d16' : 'var(--text-secondary)'
+                    backgroundColor: isActive ? 'var(--bg-surface-elevated)' : 'transparent',
+                    color: isActive ? '#fff' : 'var(--text-secondary)'
                   }}
                   onMouseEnter={e => {
                     if (!isActive) e.currentTarget.style.color = '#fff';
@@ -153,32 +153,11 @@ export default function Dashboard() {
           <button
             onClick={refreshStats}
             disabled={isRefreshing}
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.04)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-subtle)',
-              padding: '7px 14px',
-              borderRadius: '8px',
-              cursor: isRefreshing ? 'wait' : 'pointer',
-              fontWeight: '500',
-              fontSize: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-              e.currentTarget.style.color = '#fff';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
-              e.currentTarget.style.color = 'var(--text-secondary)';
-            }}
+            className="btn-ghost"
           >
             <svg 
-              width="14" 
-              height="14" 
+              width="13" 
+              height="13" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
@@ -197,133 +176,108 @@ export default function Dashboard() {
       </div>
 
       {/* LINHA 1: CARDS DE RESUMO EXECUTIVO (KPIs) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '24px' }}>
         
         {/* Card 1: Patrimônio Imobilizado */}
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '20px 22px', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)' 
-        }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '600' }}>
+        <div className="glass-card" style={{ padding: '18px 20px' }}>
+          <span className="kpi-title">
             Patrimônio Imobilizado
           </span>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-            <h3 style={{ fontSize: '24px', fontWeight: '700', color: '#fff', letterSpacing: '-0.02em' }}>
+            <h3 className="tabular-nums" style={{ fontSize: '23px', fontWeight: '700', color: '#fff', letterSpacing: '-0.03em' }}>
               R$ {Number(stats.totalStockValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
-            <span style={{ fontSize: '12px', color: 'var(--accent-cyan)', fontWeight: '500' }}>Custo Total</span>
+            <span style={{ fontSize: '11px', color: 'var(--accent-cyan)', fontWeight: '600' }}>Custo Total</span>
           </div>
         </div>
 
         {/* Card 2: Volume Físico */}
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '20px 22px', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)' 
-        }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '600' }}>
-            Volume Físico em Prateleiras
+        <div className="glass-card" style={{ padding: '18px 20px' }}>
+          <span className="kpi-title">
+            Volume Físico em Estoque
           </span>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-            <h3 style={{ fontSize: '24px', fontWeight: '700', color: '#fff', letterSpacing: '-0.02em' }}>
-              {stats.totalStockVolume} <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)' }}>un</span>
+            <h3 className="tabular-nums" style={{ fontSize: '23px', fontWeight: '700', color: '#fff', letterSpacing: '-0.03em' }}>
+              {stats.totalStockVolume} <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-muted)' }}>un</span>
             </h3>
-            <span style={{ fontSize: '12px', color: 'var(--accent-emerald)', fontWeight: '500' }}>{stats.totalProducts} SKUs</span>
+            <span style={{ fontSize: '11px', color: 'var(--accent-emerald)', fontWeight: '600' }}>{stats.totalProducts} SKUs</span>
           </div>
         </div>
 
         {/* Card 3: Itens Críticos */}
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '20px 22px', 
-          borderRadius: '12px', 
-          border: stats.lowStockCount > 0 ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid var(--border-subtle)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)' 
+        <div className="glass-card" style={{ 
+          padding: '18px 20px',
+          borderColor: stats.lowStockCount > 0 ? 'rgba(244, 63, 94, 0.28)' : 'var(--border-subtle)'
         }}>
-          <span style={{ fontSize: '11px', color: stats.lowStockCount > 0 ? '#f43f5e' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '600' }}>
+          <span className="kpi-title" style={{ color: stats.lowStockCount > 0 ? '#f43f5e' : 'var(--text-muted)' }}>
             Abaixo do Estoque Mínimo
           </span>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-            <h3 style={{ fontSize: '24px', fontWeight: '700', color: stats.lowStockCount > 0 ? '#f43f5e' : '#fff', letterSpacing: '-0.02em' }}>
+            <h3 className="tabular-nums" style={{ fontSize: '23px', fontWeight: '700', color: stats.lowStockCount > 0 ? '#f43f5e' : '#fff', letterSpacing: '-0.03em' }}>
               {stats.lowStockCount}
             </h3>
             <span style={{ 
-              fontSize: '12px', 
+              fontSize: '11px', 
               color: stats.lowStockCount > 0 ? '#f43f5e' : 'var(--accent-emerald)', 
               fontWeight: '600',
               display: 'flex',
               alignItems: 'center',
               gap: '4px'
             }}>
-              {stats.lowStockCount > 0 ? '● Reposição' : '● Em dia'}
+              {stats.lowStockCount > 0 ? '● Reposição' : '● Regular'}
             </span>
           </div>
         </div>
 
         {/* Card 4: Total de Movimentações no Período */}
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '20px 22px', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)' 
-        }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '600' }}>
+        <div className="glass-card" style={{ padding: '18px 20px' }}>
+          <span className="kpi-title">
             Movimentações ({days}D)
           </span>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-            <h3 style={{ fontSize: '24px', fontWeight: '700', color: '#fff', letterSpacing: '-0.02em' }}>
+            <h3 className="tabular-nums" style={{ fontSize: '23px', fontWeight: '700', color: '#fff', letterSpacing: '-0.03em' }}>
               {stats.totalMovements}
             </h3>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>No período</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Operações</span>
           </div>
         </div>
 
       </div>
 
       {/* LINHA 2: GRÁFICOS ANALÍTICOS (Fluxo de Movimentações + Distribuição de Categorias) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(480px, 1fr))', gap: '20px', marginBottom: '28px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(480px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         
         {/* Painel do Gráfico de Fluxo Temporal */}
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '24px', 
-          borderRadius: '16px', 
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+        <div className="glass-card" style={{ 
+          padding: '20px 22px', 
           display: 'flex',
           flexDirection: 'column'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
             <div>
-              <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#fff', letterSpacing: '-0.01em' }}>
+              <h2 style={{ fontSize: '14.5px', fontWeight: '600', color: '#fff', letterSpacing: '-0.01em' }}>
                 Fluxo de Movimentações ({days} dias)
               </h2>
-              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Comparativo diário de Entradas vs Saídas no período selecionado
+              <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                Entradas vs Saídas diárias de material
               </span>
             </div>
 
             {/* Legenda */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '11.5px', fontWeight: '600' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-emerald)' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: 'var(--accent-emerald)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '11px', fontWeight: '600' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent-emerald)' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '2px', backgroundColor: 'var(--accent-emerald)' }} />
                 Entradas
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-rose)' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: 'var(--accent-rose)' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent-rose)' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '2px', backgroundColor: 'var(--accent-rose)' }} />
                 Saídas
               </div>
             </div>
           </div>
 
           {/* Área do Gráfico SVG Dinâmico */}
-          <div style={{ position: 'relative', width: '100%', overflowX: 'auto', paddingBottom: '6px' }}>
+          <div style={{ position: 'relative', width: '100%', overflowX: 'auto', paddingBottom: '4px' }}>
             <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 30}`} style={{ width: '100%', height: 'auto', minWidth: '460px' }}>
               
               {/* Linhas de Grade Horizontais */}
@@ -331,7 +285,7 @@ export default function Dashboard() {
                 const y = chartHeight - (pct * chartHeight) + 10;
                 return (
                   <g key={idx}>
-                    <line x1="0" y1={y} x2={chartWidth} y2={y} stroke="rgba(255,255,255,0.05)" strokeDasharray="3 3" />
+                    <line x1="0" y1={y} x2={chartWidth} y2={y} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
                   </g>
                 );
               })}
@@ -362,7 +316,7 @@ export default function Dashboard() {
                         y="5" 
                         width={barGroupWidth} 
                         height={chartHeight + 25} 
-                        fill="rgba(255,255,255,0.03)" 
+                        fill="rgba(255,255,255,0.025)" 
                         rx="4"
                       />
                     )}
@@ -389,7 +343,7 @@ export default function Dashboard() {
                       opacity={isHovered ? 1 : 0.85}
                     />
 
-                    {/* Rótulo de Data no Eixo X (espaçamento inteligente para evitar sobreposição) */}
+                    {/* Rótulo de Data no Eixo X */}
                     {(idx % labelStep === 0 || idx === timeline.length - 1 || isHovered) && (
                       <text 
                         x={groupX} 
@@ -412,64 +366,60 @@ export default function Dashboard() {
               <div style={{
                 position: 'absolute',
                 top: '0px',
-                right: '10px',
-                backgroundColor: 'rgba(16, 23, 38, 0.95)',
-                border: '1px solid var(--border-subtle)',
-                backdropFilter: 'blur(12px)',
+                right: '8px',
+                backgroundColor: 'rgba(15, 19, 28, 0.94)',
+                border: '1px solid var(--border-medium)',
+                backdropFilter: 'blur(16px)',
                 padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '11.5px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                borderRadius: '7px',
+                fontSize: '11px',
+                boxShadow: '0 6px 16px rgba(0,0,0,0.4)',
                 display: 'flex',
-                gap: '12px'
+                gap: '10px'
               }}>
                 <span style={{ color: '#fff', fontWeight: '600' }}>Dia {timeline[hoveredIndex].date}:</span>
-                <span style={{ color: 'var(--accent-emerald)' }}>+{timeline[hoveredIndex].entradas} un</span>
-                <span style={{ color: 'var(--accent-rose)' }}>-{timeline[hoveredIndex].saidas} un</span>
+                <span className="tabular-nums" style={{ color: 'var(--accent-emerald)', fontWeight: '600' }}>+{timeline[hoveredIndex].entradas} un</span>
+                <span className="tabular-nums" style={{ color: 'var(--accent-rose)', fontWeight: '600' }}>-{timeline[hoveredIndex].saidas} un</span>
               </div>
             )}
           </div>
         </div>
 
         {/* Painel de Distribuição por Categoria */}
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '24px', 
-          borderRadius: '16px', 
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+        <div className="glass-card" style={{ 
+          padding: '20px 22px', 
           display: 'flex',
           flexDirection: 'column'
         }}>
-          <div style={{ marginBottom: '18px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#fff', letterSpacing: '-0.01em' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '14.5px', fontWeight: '600', color: '#fff', letterSpacing: '-0.01em' }}>
               Capital Imobilizado por Categoria
             </h2>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
               Divisão proporcional do valor total em estoque
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, justifyContent: 'center' }}>
             {(stats.categoryDistribution || []).length === 0 ? (
-              <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px', padding: '30px' }}>
+              <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12.5px', padding: '30px' }}>
                 Nenhuma categoria cadastrada no momento.
               </div>
             ) : (
               (stats.categoryDistribution || []).map((cat, idx) => (
                 <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px' }}>
-                    <span style={{ color: '#fff', fontWeight: '600' }}>
-                      {cat.category} <span style={{ color: 'var(--text-muted)', fontWeight: '400', fontSize: '11px' }}>({cat.productCount} SKUs)</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                    <span style={{ color: '#fff', fontWeight: '500' }}>
+                      {cat.category} <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>({cat.productCount} SKUs)</span>
                     </span>
-                    <span style={{ color: 'var(--text-secondary)' }}>
+                    <span className="tabular-nums" style={{ color: 'var(--text-secondary)' }}>
                       R$ {Number(cat.totalValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       <strong style={{ color: 'var(--accent-cyan)', marginLeft: '8px' }}>{cat.percentage}%</strong>
                     </span>
                   </div>
 
-                  {/* Barra de Progresso */}
-                  <div style={{ width: '100%', height: '7px', backgroundColor: 'var(--bg-surface-subtle)', borderRadius: '999px', overflow: 'hidden' }}>
+                  {/* Barra de Progresso Fina */}
+                  <div style={{ width: '100%', height: '5px', backgroundColor: 'rgba(255, 255, 255, 0.04)', borderRadius: '999px', overflow: 'hidden' }}>
                     <div style={{
                       width: `${Math.min(100, Math.max(4, cat.percentage))}%`,
                       height: '100%',
@@ -487,31 +437,25 @@ export default function Dashboard() {
       </div>
 
       {/* LINHA 3: TOP 5 PRODUTOS DE MAIOR GIRO & FEED DE AUDITORIA */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(480px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(480px, 1fr))', gap: '16px' }}>
         
         {/* Painel Top 5 Itens de Maior Giro */}
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '24px', 
-          borderRadius: '16px', 
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.15)' 
-        }}>
-          <div style={{ marginBottom: '18px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#fff', letterSpacing: '-0.01em' }}>
+        <div className="glass-card" style={{ padding: '20px 22px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '14.5px', fontWeight: '600', color: '#fff', letterSpacing: '-0.01em' }}>
               Top 5 Itens de Maior Giro ({days} dias)
             </h2>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              Materiais com maior volume de consumo no período selecionado
+            <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+              Materiais com maior volume de consumo no período
             </span>
           </div>
 
           {(stats.topProducts || []).length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px', padding: '36px' }}>
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12.5px', padding: '36px' }}>
               Nenhuma baixa/saída registrada para gerar o ranking de giro.
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {(stats.topProducts || []).map((item, idx) => (
                 <div 
                   key={item.productId || idx}
@@ -519,40 +463,43 @@ export default function Dashboard() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '10px 14px',
-                    borderRadius: '8px',
-                    backgroundColor: 'var(--bg-surface-subtle)',
-                    border: '1px solid var(--border-subtle)'
+                    padding: '8px 12px',
+                    borderRadius: '7px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid var(--border-subtle)',
+                    transition: 'all 0.15s ease'
                   }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)'}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '6px',
-                      backgroundColor: idx === 0 ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                      color: idx === 0 ? 'var(--accent-amber)' : 'var(--text-secondary)',
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className="tabular-nums" style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '5px',
+                      backgroundColor: idx === 0 ? 'rgba(245, 158, 11, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+                      color: idx === 0 ? 'var(--accent-amber)' : 'var(--text-muted)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '11px',
+                      fontSize: '10.5px',
                       fontWeight: '700'
                     }}>
-                      #{idx + 1}
+                      0{idx + 1}
                     </span>
                     <div>
-                      <div style={{ fontSize: '13.5px', fontWeight: '600', color: '#fff' }}>{item.productName}</div>
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Saldo atual: {item.currentStock} un</span>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#fff' }}>{item.productName}</div>
+                      <span className="tabular-nums" style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>Saldo: {item.currentStock} un</span>
                     </div>
                   </div>
 
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ 
-                      backgroundColor: 'rgba(244, 63, 94, 0.12)', 
+                  <div>
+                    <span className="tabular-nums" style={{ 
+                      backgroundColor: 'rgba(244, 63, 94, 0.1)', 
                       color: '#f43f5e', 
-                      padding: '3px 9px', 
+                      padding: '2px 8px', 
                       borderRadius: '999px', 
-                      fontSize: '11.5px', 
+                      fontSize: '11px', 
                       fontWeight: '700' 
                     }}>
                       -{item.totalMoved} un
@@ -565,24 +512,18 @@ export default function Dashboard() {
         </div>
 
         {/* Painel Feed de Atividades Recentes */}
-        <div style={{ 
-          backgroundColor: 'var(--bg-surface)', 
-          padding: '24px', 
-          borderRadius: '16px', 
-          border: '1px solid var(--border-subtle)',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.15)' 
-        }}>
-          <div style={{ marginBottom: '18px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#fff', letterSpacing: '-0.01em' }}>
+        <div className="glass-card" style={{ padding: '20px 22px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '14.5px', fontWeight: '600', color: '#fff', letterSpacing: '-0.01em' }}>
               Atividades Recentes no Almoxarifado
             </h2>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              Últimas entradas e saídas registradas pela equipe
+            <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+              Últimas movimentações registradas pela equipe
             </span>
           </div>
 
           {(stats.recentActivities || []).length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px', padding: '36px' }}>
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12.5px', padding: '36px' }}>
               Nenhuma movimentação registrada no sistema ainda.
             </div>
           ) : (
@@ -596,25 +537,28 @@ export default function Dashboard() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '10px 14px',
-                      borderRadius: '8px',
-                      backgroundColor: 'var(--bg-surface-subtle)',
-                      border: '1px solid var(--border-subtle)'
+                      padding: '8px 12px',
+                      borderRadius: '7px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                      border: '1px solid var(--border-subtle)',
+                      transition: 'all 0.15s ease'
                     }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)'}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
                       <span style={{
-                        width: '7px',
-                        height: '7px',
+                        width: '6px',
+                        height: '6px',
                         borderRadius: '50%',
                         backgroundColor: isEntrada ? 'var(--accent-emerald)' : 'var(--accent-rose)'
                       }} />
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: '600', color: '#fff' }}>
+                        <div style={{ fontSize: '12.5px', fontWeight: '600', color: '#fff' }}>
                           {act.productName}
                         </div>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                          por <code>{act.username}</code> • {new Date(act.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        <span style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
+                          por <code style={{ color: 'var(--text-secondary)' }}>{act.username}</code> • {new Date(act.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     </div>

@@ -164,33 +164,20 @@ export default function Team() {
     <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
       
       {/* Cabeçalho */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', letterSpacing: '-0.02em', color: '#fff' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', letterSpacing: '-0.025em', color: '#fff' }}>
             Gestão de Equipe & Acessos
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '13.5px', marginTop: '4px' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '3px' }}>
             Controle de colaboradores e credenciais vinculadas a este almoxarifado.
           </p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          style={{
-            backgroundColor: 'var(--accent-emerald)',
-            color: '#fff',
-            border: 'none',
-            padding: '10px 18px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: '600',
-            fontSize: '13px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 4px 14px rgba(16, 185, 129, 0.25)'
-          }}
+          className="btn-primary"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
@@ -199,27 +186,25 @@ export default function Team() {
       </div>
 
       {/* Tabela de Membros da Equipe */}
-      <section style={{ 
-        backgroundColor: 'var(--bg-surface)', 
+      <section className="glass-card" style={{ 
         borderRadius: '12px', 
         overflow: 'hidden', 
-        border: '1px solid var(--border-subtle)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)' 
+        border: '1px solid var(--border-hairline)'
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ backgroundColor: 'var(--bg-surface-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>Colaborador</th>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>Usuário de Login</th>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>E-mail</th>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600' }}>Nível de Permissão</th>
-              <th style={{ padding: '14px 18px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: '600', textAlign: 'center' }}>Ações</th>
+            <tr style={{ backgroundColor: 'rgba(255, 255, 255, 0.02)', borderBottom: '1px solid var(--border-hairline)' }}>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600' }}>Colaborador</th>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600' }}>Usuário de Login</th>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600' }}>E-mail</th>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600' }}>Nível de Permissão</th>
+              <th style={{ padding: '12px 18px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: '600', textAlign: 'center' }}>Ações</th>
             </tr>
           </thead>
           <tbody>
             {users.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13.5px' }}>
+                <td colSpan="5" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
                   Carregando colaboradores da empresa...
                 </td>
               </tr>
@@ -231,59 +216,60 @@ export default function Team() {
                 return (
                   <tr 
                     key={u.id} 
-                    style={{ borderBottom: '1px solid var(--border-subtle)', transition: 'background-color 0.15s ease' }}
+                    style={{ borderBottom: '1px solid var(--border-hairline)', transition: 'background-color 0.15s ease' }}
                     onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <td style={{ padding: '14px 18px' }}>
+                    <td style={{ padding: '12px 18px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{
-                          width: '32px',
-                          height: '32px',
+                          width: '30px',
+                          height: '30px',
                           borderRadius: '50%',
-                          backgroundColor: isAdminRole ? 'rgba(56, 189, 248, 0.12)' : 'rgba(148, 163, 184, 0.12)',
+                          backgroundColor: isAdminRole ? 'rgba(56, 189, 248, 0.1)' : 'rgba(255, 255, 255, 0.05)',
                           color: isAdminRole ? 'var(--accent-cyan)' : 'var(--text-secondary)',
-                          border: isAdminRole ? '1px solid rgba(56, 189, 248, 0.25)' : '1px solid var(--border-subtle)',
+                          border: isAdminRole ? '1px solid rgba(56, 189, 248, 0.25)' : '1px solid var(--border-hairline)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '11.5px',
+                          fontSize: '11px',
                           fontWeight: '700'
                         }}>
                           {getInitials(u.fullName)}
                         </div>
-                        <span style={{ fontWeight: '600', color: '#fff', fontSize: '13.5px' }}>
+                        <span style={{ fontWeight: '600', color: '#fff', fontSize: '13px' }}>
                           {u.fullName}
                         </span>
                         {!u.auth0Linked && (
-                          <span style={{ fontSize: '10.5px', color: '#fbbf24' }} title="Cadastro local aguardando vínculo Auth0">
+                          <span style={{ fontSize: '10px', color: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.1)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(251, 191, 36, 0.2)' }} title="Cadastro local aguardando vínculo Auth0">
                             Pendente Auth0
                           </span>
                         )}
                       </div>
                     </td>
-                    <td style={{ padding: '14px 18px' }}>
+                    <td style={{ padding: '12px 18px' }}>
                       <code style={{ 
                         color: 'var(--accent-cyan)', 
                         backgroundColor: 'rgba(56, 189, 248, 0.08)',
-                        padding: '3px 8px',
+                        border: '1px solid rgba(56, 189, 248, 0.18)',
+                        padding: '2px 6px',
                         borderRadius: '4px',
-                        fontSize: '12px'
+                        fontSize: '11.5px'
                       }}>
                         {u.username}
                       </code>
                     </td>
-                    <td style={{ padding: '14px 18px', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                    <td style={{ padding: '12px 18px', color: 'var(--text-secondary)', fontSize: '12.5px' }}>
                       {u.email}
                     </td>
-                    <td style={{ padding: '14px 18px' }}>
+                    <td style={{ padding: '12px 18px' }}>
                       <span style={{
-                        backgroundColor: isAdminRole ? 'rgba(56, 189, 248, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+                        backgroundColor: isAdminRole ? 'rgba(56, 189, 248, 0.08)' : 'rgba(16, 185, 129, 0.08)',
                         color: isAdminRole ? 'var(--accent-cyan)' : 'var(--accent-emerald)',
-                        border: isAdminRole ? '1px solid rgba(56, 189, 248, 0.25)' : '1px solid rgba(16, 185, 129, 0.25)',
-                        padding: '3px 10px',
+                        border: isAdminRole ? '1px solid rgba(56, 189, 248, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)',
+                        padding: '2px 8px',
                         borderRadius: '999px',
-                        fontSize: '11.5px',
+                        fontSize: '11px',
                         fontWeight: '600',
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -293,9 +279,9 @@ export default function Team() {
                         {isAdminRole ? 'Administrador' : 'Operador'}
                       </span>
                     </td>
-                    <td style={{ padding: '14px 18px', textAlign: 'center' }}>
+                    <td style={{ padding: '12px 18px', textAlign: 'center' }}>
                       {isSelf ? (
-                        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                        <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                           (Sua Conta)
                         </span>
                       ) : (
@@ -308,9 +294,9 @@ export default function Team() {
                                 backgroundColor: 'rgba(56, 189, 248, 0.08)',
                                 color: 'var(--accent-cyan)',
                                 border: '1px solid rgba(56, 189, 248, 0.2)',
-                                borderRadius: '6px',
-                                padding: '6px 12px',
-                                fontSize: '12px',
+                                borderRadius: '5px',
+                                padding: '4px 10px',
+                                fontSize: '11.5px',
                                 fontWeight: '500',
                                 cursor: retryingUserId === u.id ? 'wait' : 'pointer',
                               }}
